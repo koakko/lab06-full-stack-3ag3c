@@ -1,7 +1,7 @@
-FROM node:16
+FROM maven:3.8.6-openjdk-17
 WORKDIR /app
-COPY package.json .
-RUN npm install
-COPY . .
-EXPOSE 8090
-CMD ["npm", "start"]
+COPY pom.xml .
+RUN mvn dependency:resolve
+COPY src ./src
+EXPOSE 8080
+CMD ["mvn", "spring-boot:run"]

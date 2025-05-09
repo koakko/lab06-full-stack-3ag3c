@@ -1,46 +1,50 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './App.css';
 
 function App() {
-  const [message, setMessage] = useState('');
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
+  const [backendResponse, setBackendResponse] = useState('');
+  const [dbResponse, setDbResponse] = useState('');
 
-  const handleCall = async () => {
-    setError('');
+  const callBackend = async () => {
     try {
-      // Test Backend /hello endpoint
-      const helloResponse = await fetch('http://backend-agent:8090/hello');
-      if (!helloResponse.ok) throw new Error('Backend /hello endpoint failed');
-      const helloData = await helloResponse.json();
-      setMessage(helloData.message);
+      const response = await axios.get('http://localhost:8080/api/hello');
+      setBackendResponse(response.data.message);
+    } catch (error) {
+      setBackendResponse('Error calling backend');
+    }
+  };
 
-      // Test Backend /users endpoint (connected to database)
-      const usersResponse = await fetch('http://backend-agent:8090/users');
-      if (!usersResponse.ok) throw new Error('Backend /users endpoint failed');
-      const usersData = await usersResponse.json();
-      setUsers(usersData);
-    } catch (err) {
-      setError(err.message);
+  const callDatabase = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/db');
+      setDbResponse(response.data.message);
+    } catch (error) {
+      setDbResponse('Error calling database');
     }
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome to the React Frontend</h1>
-        <button onClick={handleCall} className="call-button">
-          Call Backend and Database
-        </button>
-        {error && <p className="error">{error}</p>}
-        {message && <p>{message}</p>}
-        <h2>Users from Database</h2>
-        <ul>
-          {users.map(user => (
-            <li key={user.id}>{user.name}</li>
-          ))}
-        </ul>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Full Stack Demo</h1>
+        <div className="space-y-4">
+          <button
+            onClick={callBackend}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          >
+            Call Backend
+          </button>
+          <p className="text-gray-600 text-center">{backendResponse || 'No response yet'}</p>
+          <button
+            onClick={callDatabase}
+            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
+          >
+            Call Database
+          </button>
+          <p className="text-gray-600 text-center">{dbResponse || 'No response yet'}</p>
+        </div>
+      </div>
     </div>
   );
 }
